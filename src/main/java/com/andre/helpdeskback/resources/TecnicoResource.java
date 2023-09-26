@@ -2,6 +2,7 @@ package com.andre.helpdeskback.resources;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,9 +15,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import com.andre.helpdeskback.domain.Pessoa;
 import com.andre.helpdeskback.domain.Tecnico;
 import com.andre.helpdeskback.domain.dtos.TecnicoDTO;
+import com.andre.helpdeskback.repositories.PessoaRepository;
 import com.andre.helpdeskback.services.TecnicoService;
+import com.andre.helpdeskback.services.exceptions.DataIntegrityViolationException;
 
 @RestController
 @RequestMapping(value = "/tecnicos")
@@ -24,6 +28,9 @@ public class TecnicoResource {
 	
 	@Autowired
 	private TecnicoService service;
+	
+	@Autowired
+	private PessoaRepository pessoaService;
 
 	@GetMapping(value = "/{id}")
 	public ResponseEntity<TecnicoDTO> findById(@PathVariable Integer id){
@@ -40,9 +47,23 @@ public class TecnicoResource {
 	
 	@PostMapping
 	public ResponseEntity<TecnicoDTO> create(@RequestBody TecnicoDTO objDTO){
+		validaPorCpfEEmail(objDTO);
 		Tecnico newObj = service.create(objDTO);
 		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(newObj.getId()).toUri();
 		return ResponseEntity.created(uri).build();
+		
+	}
+
+	private void validaPorCpfEEmail(TecnicoDTO objDTO) {
+		Optional<Pessoa> obj = pessoaService.findByCpf(objDTO.getCpf());	
+		if(obj.isPresent()) {
+			throw new DataIntegrityViolationException("CPF já cadastrado no sistema!");
+		}
+		
+		obj = pessoaService.findByEmail(objDTO.getEmail());
+		if(obj.isPresent()) {
+			throw new DataIntegrityViolationException("E-mail já cadastrado no sistema!");
+		}
 		
 	}
 }
