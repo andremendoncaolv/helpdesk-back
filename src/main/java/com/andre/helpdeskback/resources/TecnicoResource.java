@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,8 +32,7 @@ public class TecnicoResource {
 	@Autowired
 	private TecnicoService service;
 	
-	@Autowired
-	private PessoaRepository pessoaService;
+	
 
 	@GetMapping(value = "/{id}")
 	public ResponseEntity<TecnicoDTO> findById(@PathVariable Integer id){
@@ -49,23 +49,18 @@ public class TecnicoResource {
 	
 	@PostMapping
 	public ResponseEntity<TecnicoDTO> create(@Valid @RequestBody TecnicoDTO objDTO){
-		validaPorCpfEEmail(objDTO);
+		//validaPorCpfEEmail(objDTO);
 		Tecnico newObj = service.create(objDTO);
 		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(newObj.getId()).toUri();
 		return ResponseEntity.created(uri).build();
 		
 	}
 
-	private void validaPorCpfEEmail(TecnicoDTO objDTO) {
-		Optional<Pessoa> obj = pessoaService.findByCpf(objDTO.getCpf());	
-		if(obj.isPresent()) {
-			throw new DataIntegrityViolationException("CPF já cadastrado no sistema!");
-		}
-		
-		obj = pessoaService.findByEmail(objDTO.getEmail());
-		if(obj.isPresent()) {
-			throw new DataIntegrityViolationException("E-mail já cadastrado no sistema!");
-		}
-		
+	
+	
+	@PutMapping(value = "/{id}")
+	public ResponseEntity<TecnicoDTO> update (@PathVariable Integer id, @Valid @RequestBody TecnicoDTO objDTO){
+		Tecnico obj = service.update(id, objDTO);
+		return ResponseEntity.ok().body(new TecnicoDTO(obj));
 	}
 }
