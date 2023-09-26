@@ -18,13 +18,13 @@ import jakarta.validation.Valid;
 
 @Service
 public class TecnicoService {
-	
+
 	@Autowired
 	private TecnicoRepository repository;
-	
+
 	@Autowired
 	private PessoaRepository pessoaService;
-	
+
 	public Tecnico findById(Integer id) {
 		Optional<Tecnico> obj = repository.findById(id);
 		return obj.orElseThrow(() -> new ObjectnotFoundException("Objeto não encontrado! Id:" + id));
@@ -48,15 +48,23 @@ public class TecnicoService {
 		oldObj = new Tecnico(objDTO);
 		return repository.save(oldObj);
 	}
-	
+
+	public void delete(Integer id) {
+		Tecnico obj = findById(id);
+		if(obj.getChamados().size() > 0) {
+			throw new DataIntegrityViolationException("Técnico possui ordens de serviço e não pode ser deletado!");
+		}
+		repository.deleteById(id);		
+	}
+
 	private void validaPorCpfEEmail(TecnicoDTO objDTO) {
-		Optional<Pessoa> obj = pessoaService.findByCpf(objDTO.getCpf());	
-		if(obj.isPresent()) {
+		Optional<Pessoa> obj = pessoaService.findByCpf(objDTO.getCpf());
+		if (obj.isPresent()) {
 			throw new DataIntegrityViolationException("CPF já cadastrado no sistema!");
 		}
-		
+
 		obj = pessoaService.findByEmail(objDTO.getEmail());
-		if(obj.isPresent()) {
+		if (obj.isPresent()) {
 			throw new DataIntegrityViolationException("E-mail já cadastrado no sistema!");
 		}
 	}
