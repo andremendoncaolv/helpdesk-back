@@ -22,6 +22,8 @@ import com.andre.helpdeskback.repositories.PessoaRepository;
 import com.andre.helpdeskback.services.TecnicoService;
 import com.andre.helpdeskback.services.exceptions.DataIntegrityViolationException;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping(value = "/tecnicos")
 public class TecnicoResource {
@@ -46,7 +48,7 @@ public class TecnicoResource {
 	}
 	
 	@PostMapping
-	public ResponseEntity<TecnicoDTO> create(@RequestBody TecnicoDTO objDTO){
+	public ResponseEntity<TecnicoDTO> create(@Valid @RequestBody TecnicoDTO objDTO){
 		validaPorCpfEEmail(objDTO);
 		Tecnico newObj = service.create(objDTO);
 		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(newObj.getId()).toUri();
