@@ -2,32 +2,31 @@ package com.andre.helpdeskback.services;
 
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import com.andre.helpdeskback.domain.Person;
-import com.andre.helpdeskback.repositories.PersonRepository;
+import com.andre.helpdeskback.domain.Pessoa;
+import com.andre.helpdeskback.repositories.PessoaRepository;
 import com.andre.helpdeskback.security.UserSS;
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
+	
+	private final PessoaRepository pessoaRepository;
 
-  @Autowired
-  private final PersonRepository personRepository;
-
-  public UserDetailsServiceImpl(PersonRepository personRepository) {
-    this.personRepository = personRepository;
-  }
-
-  @Override
-  public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-    Optional<Person> user = personRepository.findByEmail(email);
-    if(user.isPresent()){
-      return new UserSS(user.get().getId(), user.get().getEmail(), user.get().getPassword(), user.get().getProfiles());
+    UserDetailsServiceImpl(PessoaRepository pessoaRepository) {
+        this.pessoaRepository = pessoaRepository;
     }
-    throw new UsernameNotFoundException("User Not Found with email: " + email);
-  }
+
+	@Override
+	public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+		Optional<Pessoa> usuario = pessoaRepository.findByEmail(email);
+		if(usuario.isPresent()) {
+			return new UserSS(usuario.get().getId(), usuario.get().getEmail(), usuario.get().getSenha(), usuario.get().getPerfis());
+		}
+		throw new UsernameNotFoundException("User Not Found with email: " + email);
+	}
+
 }
