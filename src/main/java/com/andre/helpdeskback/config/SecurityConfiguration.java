@@ -27,7 +27,7 @@ import com.andre.helpdeskback.security.SecurityFilter;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
-@Profile("test")
+@Profile("dev")
 public class SecurityConfiguration {
 	
 	@Autowired
