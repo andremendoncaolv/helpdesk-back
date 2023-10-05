@@ -7,6 +7,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import com.andre.helpdeskback.services.exceptions.ConstraintViolationException;
 import com.andre.helpdeskback.services.exceptions.DataIntegrityViolationException;
 import com.andre.helpdeskback.services.exceptions.ObjectnotFoundException;
 import com.andre.helpdeskback.services.exceptions.ValidationError;
@@ -48,5 +49,17 @@ public class ResourceExceptionHandler {
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
 		
 	}
+	
+	 @ExceptionHandler({ConstraintViolationException.class})
+	  public ResponseEntity<StandardError> constraintViolationException(ConstraintViolationException ex, HttpServletRequest request) {
+	    StandardError error = new StandardError(
+	        System.currentTimeMillis(),
+	        HttpStatus.BAD_REQUEST.value(),
+	        "Invalid Brazilian Individual Taxpayer Registration (CPF) number",
+	        ex.getMessage(),
+	        request.getRequestURI()
+	    );
+	    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+	  }
 
 }

@@ -1,5 +1,9 @@
 package com.andre.helpdeskback.config;
 
+import static org.springframework.boot.autoconfigure.security.servlet.PathRequest.toH2Console;
+
+import java.util.Arrays;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,7 +15,6 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -21,49 +24,39 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.andre.helpdeskback.security.SecurityFilter;
 
-import static org.springframework.boot.autoconfigure.security.servlet.PathRequest.toH2Console;
-
-import java.util.Arrays;
-
-
-
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
-@Profile("test")
-public class SecurityConfig {
-
-    @Autowired
+@Profile("dev")
+public class SecurityConfiguration {
+	
+	@Autowired
     SecurityFilter securityFilter;
+	
     @Autowired
     private Environment env;
-
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http)
-            throws Exception {
-
-        if (Arrays.asList(env.getActiveProfiles()).contains("test")) {
-            http.headers().frameOptions().disable();
+	
+	@Bean
+	public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
+		
+		if (Arrays.asList(env.getActiveProfiles()).contains("test")) {
+			httpSecurity.headers().frameOptions().disable();
         }
 
-        return http
-                .cors(AbstractHttpConfigurer::disable)
-                .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(authorize -> authorize
-                                .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
-//            .requestMatchers(HttpMethod.GET, "/").permitAll()
-//            .requestMatchers(HttpMethod.POST,"/auth/register").permitAll()
-//            .requestMatchers(HttpMethod.POST,"/ticket").hasRole("ADMIN")
-                                .requestMatchers(toH2Console()).permitAll()
-                                .requestMatchers("/**").permitAll()
-                                .anyRequest().permitAll()
-                )
-                .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
-                .build();
-
-    }
-    @Bean
+		return httpSecurity
+				.csrf(csrf -> csrf.disable())
+				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+				.authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
+                        .requestMatchers(toH2Console()).permitAll()
+                        .requestMatchers("/**").permitAll()
+                        .anyRequest().permitAll()
+				)
+				.addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
+				.build();
+	}
+	
+	@Bean
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
             @Override
@@ -82,5 +75,4 @@ public class SecurityConfig {
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
 }
