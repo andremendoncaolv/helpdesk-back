@@ -67,4 +67,11 @@ public class DBService {
 		clienteRepository.saveAll(Arrays.asList(cli1, cli2, cli3, cli4, cli5, cli6));
 		chamadoRepository.saveAll(Arrays.asList(c1, c2, c3));
 	}
+		
+		public void instanciaProdDB() {
+			Tecnico tec1 = new Tecnico(null, "Andre Mendonca", "andre@email.com", "61394022042", encoder.encode("123"));
+			tec1.addPerfil(Perfil.ADMIN);
+			
+			tecnicoRepository.saveAll(Arrays.asList(tec1));
+		}
 }
