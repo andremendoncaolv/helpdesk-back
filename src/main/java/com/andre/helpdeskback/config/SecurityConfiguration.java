@@ -27,7 +27,7 @@ import com.andre.helpdeskback.security.SecurityFilter;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
-@Profile("prod")
+@Profile("dev")
 public class SecurityConfiguration {
 	
 	@Autowired
@@ -48,7 +48,7 @@ public class SecurityConfiguration {
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
-                        .requestMatchers(toH2Console()).permitAll()
+                        //.requestMatchers(toH2Console()).permitAll()
                         .requestMatchers("/**").permitAll()
                         .anyRequest().permitAll()
 				)
